@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
+from datetime import timedelta
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,12 +21,36 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1e5v&*it$i)m^(4e5j_y6#sb6n6o04t)fxdj()v7*2nb*xg-fu'
+SECRET_KEY = '$zjucs!n^yl^)xbzuy8%vnw=ti1f5&*urcow7^stfc)#+9+a*njn$upje_76'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'Access-Control-Allow-Origin',
+]
+
 
 
 # Application definition
@@ -38,11 +63,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'wsi_social',
+    'drf_spectacular',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -55,7 +85,7 @@ ROOT_URLCONF = 'wsi_social_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['wsi_social/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -105,14 +135,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = 'pt-br'
-
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'America/Sao_Paulo'
+USE_TZ = False
 USE_I18N = True
-
 USE_L10N = True
-
-USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -120,7 +146,62 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
+# https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_FIELD': 'id',
+    'USER_CLAIM': 'user',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+    'TOKEN_USER_CLASS': 'rest_framework_simplejwt.models.TokenUser',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=10),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=20)
+}
+
+
+# DRF
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    
+}
+
+
+# # Name of static files folder (after called python manage.py collectstatic)
+# STATIC_ROOT = "static"
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API WSI SOCIAL',
+    'DESCRIPTION': 'API DA APLICACAO WSI SOCIAL',
+    'VERSION': '1.0.0',
+    'LICENSE': 'MIT',
+    'EMAIL': 'waltersilva123454@gmail.com'
+}
